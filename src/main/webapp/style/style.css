@@ -1,0 +1,11 @@
+body { font-size:10pt; }
+table { border-collapse:collapse; }
+th, td { border:1px solid black; font-size:10pt; }
+
+.center { text-align:center; width: 500px; }
+.left { float: left; position: relative; }
+.right { float: right; position: relative; text-align:right; }
+.link { cursor:pointer; }
+
+a { text-decoration:none; color:black; }
+

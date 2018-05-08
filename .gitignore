@@ -1,0 +1,10 @@
+.svn/
+.classpath
+.pmd
+.project
+.settings/
+.svn/
+.tern-project
+target/
+readme.txt
+src/main/resources/

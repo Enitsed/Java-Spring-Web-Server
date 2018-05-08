@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+
+	<!-- 공통요소 정의 -->
+	<definition name="itemUnit" template="/WEB-INF/tiles/def/itemUnit.jsp" />		<!-- 상품유닛 -->
+	<definition name="select" template="/WEB-INF/tiles/def/select.jsp" />			<!-- select 인터페이스 -->
+
+
+	<!-- 레이아웃 구성 -->
+	<definition name="default" template="/WEB-INF/tiles/template/default.jsp">
+		<put-attribute name="title" value="Crewmate"></put-attribute>
+		<put-attribute name="header" value="/WEB-INF/tiles/template/header.jsp" />
+		<put-attribute name="left" value="/WEB-INF/tiles/template/left.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="right" value="/WEB-INF/tiles/template/right.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/tiles/template/footer.jsp" />
+	</definition>
+
+
+	<definition name="exception/*" extends="default">
+		<put-attribute name="body" value="/WEB-INF/jsp/exception/{1}.jsp" />
+	</definition>
+
+
+
+	<definition name="*" extends="default">
+		<put-attribute name="body" value="/WEB-INF/jsp/{1}.jsp" />
+	</definition>
+
+	<definition name="*/*" extends="default">
+		<put-attribute name="body" value="/WEB-INF/jsp/{1}/{2}.jsp" />
+	</definition>
+
+	<definition name="*/*/*" extends="default">
+		<put-attribute name="body" value="/WEB-INF/jsp/{1}/{2}/{3}.jsp" />
+	</definition>
+	
+
+	
+</tiles-definitions>
