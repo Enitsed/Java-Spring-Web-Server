@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- file 관련 mapper  -->
+<mapper namespace="File">
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 파일정보 등록 처리
+	-->
+	<insert id="insertFiles" parameterType="Files">
+		/* File.insertFiles */
+		INSERT INTO Files(FILE_TYPE, REF_SEQ, FILESIZE, FILENAME, FILEPATH, REG_SEQ, REG_DT)
+		VALUES(#{fileType}, #{refSeq}, #{filesize}, #{filename}, #{filepath}, #{regSeq}, #{sysdate})
+	</insert>
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 파일정보 삭제 처리
+	-->
+	<delete id="deleteFiles" parameterType="Files">
+		/* File.deleteFiles */
+		DELETE FROM FILES
+		WHERE
+		<trim prefixOverrides="AND|OR">
+			<if test="fileSeq != 0">
+				AND FILE_SEQ = #{fileSeq}
+			</if>
+			<if test="refSeq != 0">
+				AND REF_SEQ = #{refSeq}
+			</if>
+			<if test="refSeq != 0">
+				AND REG_SEQ = #{regSeq}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(fileType)">
+				AND FILE_TYPE = #{fileType}
+			</if>
+		</trim>
+	</delete>
+	
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 파일정보 조회 처리
+	-->
+	<select id="selectFiles" parameterType="Files" resultType="Files">
+		SELECT
+			A.FILE_SEQ, 
+			A.FILE_TYPE, 
+			A.REF_SEQ, 
+			A.FILESIZE, 
+			A.FILENAME, 
+			A.FILEPATH, 
+			A.REG_SEQ
+		FROM FILES A
+		WHERE
+		<trim prefixOverrides="AND|OR">
+			<if test="fileSeq != 0">
+				AND FILE_SEQ = #{fileSeq}
+			</if>
+			<if test="refSeq != 0">
+				AND REF_SEQ = #{refSeq}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(fileType)">
+				AND FILE_TYPE = #{fileType}
+			</if>
+		</trim>
+	</select>
+	
+</mapper>

@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	작성자 : 정슬기
+	작성일 : 2018.05.03
+	기능 : 전시 관련 매퍼 처리
+-->
+<mapper namespace="Disp">
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역 정보 조회 처리
+	-->
+	<select id="selectDispArea" parameterType="DispArea" resultType="DispArea">
+		/* Disp.selectDispArea */
+		SELECT
+			A.DISP_CD, 
+			A.DISP_TYPE, 
+			A.DISP_CNT, 
+			A.REG_SEQ, 
+			A.REG_DT, 
+			A.MOD_SEQ, 
+			A.MOD_DT, 
+			A.DISP_AREA_NM, 
+			A.USE_YN, 
+			A.DTL_USE_YN, 
+			B.NAME AS REG_NM,
+			C.NAME AS MOD_NM 			
+		FROM DISP_AREA A
+		INNER JOIN USER B
+		ON B.USER_SEQ = A.REG_SEQ
+		INNER JOIN USER C
+		ON C.USER_SEQ = A.REG_SEQ		
+		WHERE
+			<include refid="Disp.selectDispAreaWhere" />
+		ORDER BY A.REG_DT DESC
+		LIMIT #{limitStart}, #{limitEnd}			
+	</select>
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역정보조회 카운트 처리
+	-->
+	<select id="selectDispAreaCount" parameterType="DispArea" resultType="int">
+		/* Disp.selectDispAreaCount */
+		SELECT
+			COUNT(*)
+		FROM DISP_AREA A
+		WHERE
+			<include refid="Disp.selectDispAreaWhere" />
+	</select>
+	
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역정보조회 공통조건절
+	-->
+	<sql id="selectDispAreaWhere">
+		<trim prefixOverrides="AND|OR">
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(dispCd)">
+				AND A.DISP_CD = #{dispCd}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(useYn)">
+				AND A.USE_YN = #{useYn}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(dispType)">
+				AND A.DISP_TYPE = #{dispType}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(keyWord)">
+				<if test="@org.apache.commons.lang3.StringUtils@equals(keyField, 'dispAreaNm')">
+					AND A.DISP_AREA_NM LIKE CONCAT('%', #{keyWord},'%')
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@equals(keyField, 'dispCd')">
+					AND A.DISP_CD LIKE CONCAT('%', #{keyWord},'%')
+				</if>
+			</if>
+		</trim>
+	</sql>
+
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역상세 정보 조회 처리
+	-->
+	<select id="selectDispAreaDtl" parameterType="DispAreaDtl" resultType="DispAreaDtl">
+		/* Disp.selectDispAreaDtl */
+		SELECT
+			A.DISP_AREA_DTL_SEQ, 
+			A.DISP_CD, 
+			A.DISP_AREA_DTL_NM, 
+			A.DISP_NO, 
+			A.USE_YN 
+		FROM DISP_AREA_DTL A
+		WHERE
+		<trim prefixOverrides="AND|OR">
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(dispCd)">
+				AND A.DISP_CD = #{dispCd}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(useYn)">
+				AND A.USE_YN = #{useYn}
+			</if>
+		</trim>
+		ORDER BY A.DISP_NO
+	</select>
+
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역 등록 처리
+	-->
+	<insert id="insertDispArea" parameterType="DispArea">
+		/* Disp.insertDispArea */
+		INSERT INTO DISP_AREA(DISP_CD, DISP_TYPE, DISP_CNT, REG_SEQ, REG_DT, MOD_SEQ, MOD_DT, DISP_AREA_NM, USE_YN, DTL_USE_YN)
+		VALUES(#{dispCd}, #{dispType}, #{dispCnt}, #{regSeq}, #{sysdate}, #{modSeq}, #{sysdate}, #{dispAreaNm}, #{useYn}, #{dtlUseYn})
+	</insert>
+
+	
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역상세 등록 처리
+				- ON DUPLICATE KEY UPDATE 적용 검토 필요. -> 그냥 update로 처리하기로 결정
+	-->
+	<insert id="insertDispAreaDtl" parameterType="DispAreaDtl">
+		/* Disp.insertDispAreaDtl */
+		INSERT INTO DISP_AREA_DTL(DISP_CD, DISP_AREA_DTL_NM, DISP_NO, USE_YN)
+		VALUES(#{dispCd}, #{dispAreaDtlNm}, #{dispNo}, #{useYn})
+	</insert>
+
+	
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역 수정 처리
+	-->
+	<update id="updateDispArea" parameterType="DispArea">
+		/* Disp.updateDispArea */
+		UPDATE DISP_AREA SET 
+			DISP_CNT = #{dispCnt}, 
+			MOD_SEQ = #{modSeq}, 
+			MOD_DT = #{sysdate}, 
+			DISP_AREA_NM = #{dispAreaNm}, 
+			DTL_USE_YN = #{dtlUseYn}
+		WHERE
+			DISP_CD = #{dispCd}
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(useYn)">
+				AND USE_YN = #{useYn}
+			</if>			
+	</update>
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역 사용여부 수정 처리
+	-->
+	<update id="updateDispAreaUseYn" parameterType="DispArea">
+		/* Disp.updateDispAreaUseYn */
+		UPDATE DISP_AREA SET 
+			USE_YN = #{useYn}, 		
+			MOD_SEQ = #{modSeq}, 
+			MOD_DT = #{sysdate}
+		WHERE
+			DISP_CD = #{dispCd}
+	</update>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역상세 수정 처리
+	-->
+	<update id="updateDispAreaDtl" parameterType="DispAreaDtl">
+		/* Disp.updateDispAreaDtl */
+		UPDATE DISP_AREA_DTL SET 
+			DISP_AREA_DTL_NM = #{dispAreaDtlNm}, 
+			DISP_NO = #{dispNo} 
+		WHERE
+			DISP_CD = #{dispCd} AND 
+			DISP_AREA_DTL_SEQ = #{dispAreaDtlSeq}
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(useYn)">
+				AND USE_YN = #{useYn}
+			</if>			
+	</update>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역상세 사용여부 수정 처리
+	-->
+	<update id="updateDispAreaDtlUseYn" parameterType="DispAreaDtl">
+		/* Disp.updateDispAreaDtlUseYn */
+		UPDATE DISP_AREA_DTL SET 
+			USE_YN = #{useYn}
+		WHERE
+			DISP_CD = #{dispCd} AND 
+			DISP_AREA_DTL_SEQ = #{dispAreaDtlSeq}
+	</update>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 전시영역상세 사용여부 수정 처리 - 첫번째만 남기로 나머지는 모두 미사용으로 변경 처리 - 전시순서 기준임.
+			- mysql은 서브쿼리를 한번더 만들어야 함.
+	-->
+	<update id="updateDispAreaDtlUseYnFirst" parameterType="DispAreaDtl">
+		/* Disp.updateDispAreaDtlUseYnFirst */
+		UPDATE DISP_AREA_DTL SET 
+			USE_YN = 'N'
+		WHERE
+			DISP_CD = #{dispCd} AND 
+			DISP_AREA_DTL_SEQ NOT IN (
+				SELECT SEQ FROM (
+					SELECT
+						MIN(A.DISP_AREA_DTL_SEQ) AS SEQ
+					FROM DISP_AREA_DTL A
+					WHERE
+						A.USE_YN = 'Y' AND 
+						A.DISP_CD = #{dispCd} AND 
+						A.DISP_NO IN (SELECT MIN(T.DISP_NO) FROM DISP_AREA_DTL T WHERE T.DISP_CD = #{dispCd} AND T.USE_YN = 'Y')
+				) TMP
+			)
+	</update>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 템플릿 등록 처리
+	-->
+	<insert id="insertTmpl" parameterType="Tmpl">
+		/* Disp.insertTmpl */
+		INSERT INTO TMPL(TMPL_NM, TMPL_TGT, TMPL_PATH, REG_SEQ, REG_DT, MOD_SEQ, MOD_DT)
+		VALUES(#{tmplNm}, #{tmplTgt}, #{tmplPath}, #{regSeq}, #{sysdate}, #{modSeq}, #{sysdate})
+		
+		<selectKey keyProperty="tmplSeq" order="AFTER" resultType="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>		
+	</insert>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 템플릿 전시영역 등록 처리
+	-->
+	<insert id="insertTmplDispArea" parameterType="TmplDispArea">
+		/* Disp.insertTmplDispArea */
+		INSERT INTO TMPL_DISP_AREA(TMPL_SEQ, DISP_CD)
+		VALUES(#{tmplSeq}, #{dispCd})
+	</insert>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 템플릿 수정 처리
+	-->
+	<update id="updateTmpl" parameterType="Tmpl">
+		/* Disp.updateTmpl */
+		UPDATE TMPL SET 
+			TMPL_NM = #{tmplNm}, 
+			TMPL_PATH = #{tmplPath}, 
+			MOD_SEQ = #{modSeq}, 
+			MOD_DT = #{sysdate}
+		WHERE
+			TMPL_SEQ = #{tmplSeq}		
+	</update>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 템플릿 전시영역 삭제처리
+	-->
+	<delete id="deleteTmplDispArea" parameterType="TmplDispArea">
+		/* Disp.deleteTmplDispArea */
+		DELETE FROM TMPL_DISP_AREA
+		WHERE
+			TMPL_SEQ = #{tmplSeq}
+	</delete>
+	
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 템플릿 정보 조회 처리
+	-->
+	<select id="selectTmpl" parameterType="Tmpl" resultType="Tmpl">
+		/* Disp.selectTmpl */
+		SELECT
+			A.TMPL_SEQ, 
+			A.TMPL_NM, 
+			A.TMPL_TGT, 
+			A.TMPL_PATH, 
+			A.REG_SEQ, 
+			A.REG_DT, 
+			A.MOD_SEQ, 
+			A.MOD_DT, 
+			B.NAME AS REG_NM,
+			C.NAME AS MOD_NM 			
+		FROM TMPL A
+		INNER JOIN USER B
+		ON B.USER_SEQ = A.REG_SEQ
+		INNER JOIN USER C
+		ON C.USER_SEQ = A.REG_SEQ		
+		<include refid="Disp.selectTmplWhere" />
+		ORDER BY A.TMPL_SEQ DESC
+		LIMIT #{limitStart}, #{limitEnd}			
+	</select>
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 템플릿 정보조회 카운트 처리
+	-->
+	<select id="selectTmplCount" parameterType="Tmpl" resultType="int">
+		/* Disp.selectTmplCount */
+		SELECT
+			COUNT(*)
+		FROM TMPL A
+		<include refid="Disp.selectTmplWhere" />
+	</select>
+	
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 템플릿 정보조회 공통조건절
+	-->
+	<sql id="selectTmplWhere">
+		<trim prefixOverrides="AND|OR" prefix="WHERE">
+			<if test="tmplSeq != 0">
+				AND A.TMPL_SEQ = #{tmplSeq}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(tmplTgt)">
+				AND A.TMPL_TGT = #{tmplTgt}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(keyWord)">
+				<if test="@org.apache.commons.lang3.StringUtils@equals(keyField, 'tmplNm')">
+					AND A.TMPL_NM LIKE CONCAT('%', #{keyWord},'%')
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@equals(keyField, 'tmplPath')">
+					AND A.TMPL_PATH LIKE CONCAT('%', #{keyWord},'%')
+				</if>
+			</if>
+		</trim>
+	</sql>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 템플릿 전싱영역 정보 조회 처리
+	-->
+	<select id="selectTmplDispArea" parameterType="TmplDispArea" resultType="DispArea">
+		/* Disp.selectDispAreaDtl */
+		SELECT
+			B.DISP_CD, 
+			B.DISP_TYPE, 
+			B.DISP_CNT, 
+			B.REG_SEQ, 
+			B.REG_DT, 
+			B.MOD_SEQ, 
+			B.MOD_DT, 
+			B.DISP_AREA_NM, 
+			B.USE_YN, 
+			B.DTL_USE_YN
+		FROM TMPL_DISP_AREA A
+		INNER JOIN DISP_AREA B
+		ON B.USE_YN = 'Y' AND B.DISP_CD = A.DISP_CD
+		WHERE
+			A.TMPL_SEQ = #{tmplSeq}
+	</select>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 매장 템플릿 정보 등록 처리
+	-->
+	<insert id="insertCtgTmpl" parameterType="CtgTmpl">
+		/* Disp.insertCtgTmpl */
+		INSERT INTO CTG_TMPL(CTG_SEQ, TMPL_SEQ)
+		VALUES(#{ctgSeq}, #{tmplSeq})
+	</insert>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 매장 템플릿 정보 삭제 처리
+	-->
+	<delete id="deleteCtgTmpl" parameterType="CtgTmpl">
+		/* Disp.deleteCtgTmpl */
+		DELETE FROM CTG_TMPL
+		WHERE
+			CTG_SEQ = #{ctgSeq}
+	</delete>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.03
+		기능 : 매장 템플릿 정보 반환 처리
+	-->
+	<select id="selectCtgTmpl" parameterType="CtgTmpl" resultType="Tmpl">
+		/* Disp.selectCtgTmpl */
+		SELECT
+			B.TMPL_SEQ, 
+			B.TMPL_NM, 
+			B.TMPL_TGT, 
+			B.TMPL_PATH 
+		FROM CTG_TMPL A	
+		INNER JOIN TMPL B 
+		ON B.TMPL_SEQ = A.TMPL_SEQ
+		WHERE
+			A.CTG_SEQ = #{ctgSeq}
+	</select>
+
+</mapper>

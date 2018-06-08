@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	작성자 : 정슬기 
+	작성일 : 2018.04.02
+	기능 : - 회원가입 관련 매퍼 
+-->
+
+<mapper namespace="User">
+	
+	
+	<!-- 작성자 : 정슬기
+		  작성일 : 2018.04.02
+		  기능 : - 유저 아이디 중복 체크
+	 -->
+	 	<select id="selectUser" parameterType="User" resultType="User">
+		/* User.selectUser */
+		SELECT
+			A.USER_SEQ, 
+			A.USER_ID, 
+			A.USER_PW, 
+			A.NAME, 
+			A.EMAIL 
+		FROM USER A
+		WHERE
+			A.USER_ID = #{userId}
+	</select>
+	
+	<!-- 작성자 : 정슬기
+		  작성일 : 2018.04.16
+		  기능 : - 유저 추가
+	-->
+	
+	<insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="userSeq">
+		/* User.insertUser */
+		INSERT INTO USER(USER_SEQ, USER_ID, USER_PW, NAME, EMAIL, REG_SEQ, REG_DT, MOD_SEQ, MOD_DT)
+		VALUES(#{userSeq}, #{userId}, #{userPw}, #{name}, #{email}, 0, #{sysdate}, 0, #{sysdate})
+	</insert>
+
+</mapper>

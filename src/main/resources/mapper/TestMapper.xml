@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	작성자 : 정슬기 
+	작성일 : 2018.03.27 
+	기능 : - 테스트 관련 매퍼 
+-->
+
+<mapper namespace="Test">
+	
+	<!-- 작성자 : 정슬기
+		  작성일 : 2018.03.28 
+		  기능 : - 특정 테스트 값 반환 select 
+	-->
+	<select id="selectTest" resultType="Test" parameterType="int">
+		/* Test.selectTest*/
+		SELECT * FROM TEST WHERE test_seq=#{index}
+	</select>
+	
+	<!-- 작성자 : 정슬기
+		  작성일 : 2018.03.29 
+		  기능 : - 테스트 값 리스트 반환 select 
+	-->
+	<select id="selectTestList" resultType="Test">
+		/* Test.selectTestList*/
+		SELECT * FROM TEST
+	</select>
+	
+	<!-- 작성자 : 정슬기
+		  작성일 : 2018.03.28 
+		  기능 : - 테스트 DB 삽입
+	-->
+	<insert id="insertTest" parameterType="map">
+		/* Test.insertTest */
+		INSERT INTO TEST (TITLE, CONTENTS)
+		VALUES(#{title}, #{contents})
+	</insert>
+	
+	<!-- 작성자 : 정슬기
+		  작성일 : 2018.03.28 
+		  기능 : - 테스트 DB 업데이트
+	-->
+	<update id="updateTest" parameterType="map">
+		/* Test.updateTest */
+		UPDATE TEST SET 
+			title=#{title}, 
+			contents=#{contents} 
+		WHERE 
+			test_seq=#{index}
+	</update>
+	
+
+
+</mapper>

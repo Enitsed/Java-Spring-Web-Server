@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	작성자 : 정슬기
+	작성일 : 2018.04.24
+	기능 : 상품 관련 DB 활용
+ -->	
+<mapper namespace="Item">
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 조회 처리
+	-->
+	<select id="selectItem" parameterType="Item" resultType="Item">
+		/* Item.selectItem */
+		SELECT
+			A.ITEM_SEQ, 
+			A.ITEM_NM, 
+			A.SEARCH_KEYWORD, 
+			A.DESC_SHORT, 
+			A.DESC_LONG, 
+			A.ITEM_STAT, 
+			A.ITEM_DISP_STAT, 
+			A.SELL_CNT_MIN, 
+			A.SELL_CNT_MAX, 
+			A.PRICE, 
+			A.PRICE_DC, 
+			A.REG_SEQ, 
+			A.REG_DT, 
+			A.MOD_SEQ, 
+			A.MOD_DT, 
+			A.STOCK_CNT_TOT, 
+			A.SALE_CNT_TOT, 
+			(SELECT T.CTG_SEQ FROM ITEM_CTG T WHERE T.ITEM_SEQ = A.ITEM_SEQ AND T.ITEM_CTG_TYPE = 'MST') AS CTG_SEQ_MST, 
+			B.NAME AS REG_NM,
+			C.NAME AS MOD_NM 
+		FROM ITEM A
+		INNER JOIN USER B
+		ON B.USER_SEQ = A.REG_SEQ
+		INNER JOIN USER C
+		ON C.USER_SEQ = A.REG_SEQ
+		<include refid="Item.selectItemWhere" />
+		ORDER BY A.ITEM_SEQ DESC
+		LIMIT #{limitStart}, #{limitEnd}
+	</select>
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 조회 카운트 처리
+	-->
+	<select id="selectItemCount" parameterType="Item" resultType="int">
+		/* Item.selectItemCount */
+		SELECT
+			COUNT(*) 
+		FROM ITEM A
+		<include refid="Item.selectItemWhere" />
+	</select>	
+	
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 조회 공통 조건절
+	-->
+	<sql id="selectItemWhere">
+		<trim prefixOverrides="AND|OR" prefix="WHERE">
+			<if test="itemSeq != 0">
+				AND A.ITEM_SEQ = #{itemSeq}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(itemStat)">
+				AND A.ITEM_STAT = #{itemStat}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(itemDispStat)">
+				AND A.ITEM_DISP_STAT = #{itemDispStat}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(keyWord)">
+				<if test="@org.apache.commons.lang3.StringUtils@equals(keyField, 'itemNm')">
+					AND A.ITEM_NM LIKE CONCAT('%', #{keyWord},'%')
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@equals(keyField, 'descShort')">
+					AND A.DESC_SHORT LIKE CONCAT('%', #{keyWord},'%')
+				</if>
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(ctgPath)">
+				AND EXISTS (
+					SELECT 1 FROM CTG T1
+					INNER JOIN ITEM_CTG T2
+					ON T2.CTG_SEQ = T1.CTG_SEQ AND T2.ITEM_CTG_TYPE = 'DISP' 
+					WHERE
+						T1.CTG_PATH LIKE CONCAT(#{ctgPath},'%') AND T2.ITEM_SEQ = A.ITEM_SEQ
+				)
+			</if>
+		</trim>
+	</sql>	
+	
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 등록 처리
+	-->
+	<insert id="insertItem" parameterType="Item">
+		/* Item.insertItem */
+		INSERT INTO ITEM(ITEM_NM, SEARCH_KEYWORD, DESC_SHORT, DESC_LONG, ITEM_STAT, ITEM_DISP_STAT, SELL_CNT_MIN, SELL_CNT_MAX, PRICE, PRICE_DC, REG_SEQ, REG_DT, MOD_SEQ, MOD_DT, STOCK_CNT_TOT, SALE_CNT_TOT)
+		VALUES(#{itemNm}, #{searchKeyword}, #{descShort}, #{descLong}, #{itemStat}, #{itemDispStat}, #{sellCntMin}, #{sellCntMax}, #{price}, #{priceDc}, #{regSeq}, #{sysdate}, #{modSeq}, #{sysdate}, #{stockCntTot}, #{saleCntTot})
+		
+		<selectKey keyProperty="itemSeq" order="AFTER" resultType="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>		
+	</insert>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 수정 처리
+	-->
+	<update id="updateItem" parameterType="Item">
+		/* Item.updateItem */
+		UPDATE ITEM SET 
+			ITEM_NM = #{itemNm}, 
+			SEARCH_KEYWORD = #{searchKeyword}, 
+			DESC_SHORT = #{descShort}, 
+			DESC_LONG = #{descLong}, 
+			ITEM_STAT = #{itemStat}, 
+			ITEM_DISP_STAT = #{itemDispStat}, 
+			SELL_CNT_MIN = #{sellCntMin}, 
+			SELL_CNT_MAX = #{sellCntMax}, 
+			PRICE = #{price}, 
+			PRICE_DC = #{priceDc}, 
+			MOD_SEQ = #{modSeq}, 
+			MOD_DT = #{sysdate}, 
+			STOCK_CNT_TOT = #{stockCntTot} 
+		WHERE
+			ITEM_SEQ = #{itemSeq}
+	</update>
+
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 카테고리 등록 처리
+	-->
+	<insert id="insertItemCtg" parameterType="ItemCtg">
+		/* Item.insertItemCtg */
+		INSERT INTO ITEM_CTG(ITEM_SEQ, CTG_SEQ, ITEM_CTG_TYPE)
+		VALUES(#{itemSeq}, #{ctgSeq}, #{itemCtgType})
+	</insert>
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 카테고리 삭제 처리
+	-->
+	<delete id="deleteItemCtg" parameterType="ItemCtg">
+		/* Item.deleteItemCtg */
+		DELETE FROM ITEM_CTG
+		WHERE
+			<trim prefixOverrides="AND|OR">
+				<if test="itemSeq != 0">
+					AND ITEM_SEQ = #{itemSeq}
+				</if>
+				<if test="ctgSeq != 0">
+					AND CTG_SEQ = #{ctgSeq}
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(itemCtgType)">
+					AND ITEM_CTG_TYPE = #{itemCtgType}
+				</if>
+			</trim>
+	</delete>
+	
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 카테고리 조회 처리
+	-->
+	<select id="selectItemCtg" parameterType="ItemCtg" resultType="ItemCtg">
+		/* Item.selectItemCtg */
+		SELECT
+			A.ITEM_SEQ, 
+			A.CTG_SEQ, 
+			A.ITEM_CTG_TYPE 
+		FROM ITEM_CTG A
+		WHERE
+			A.ITEM_SEQ = #{itemSeq} AND
+			A.ITEM_CTG_TYPE = #{itemCtgType}
+	</select>
+
+
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 조회 처리 - 전시용
+	-->
+	<select id="selectItemForDisp" parameterType="Item" resultType="Item">
+		/* Item.selectItemForDisp */
+		SELECT
+			A.ITEM_SEQ, 
+			A.ITEM_NM, 
+			A.SEARCH_KEYWORD, 
+			A.DESC_SHORT, 
+			A.DESC_LONG, 
+			A.ITEM_STAT, 
+			A.ITEM_DISP_STAT, 
+			A.SELL_CNT_MIN, 
+			A.SELL_CNT_MAX, 
+			A.PRICE, 
+			A.PRICE_DC, 
+			A.REG_SEQ, 
+			A.REG_DT, 
+			A.MOD_SEQ, 
+			A.MOD_DT, 
+			A.STOCK_CNT_TOT, 
+			A.SALE_CNT_TOT, 
+			B.FILEPATH AS MST_IMG_PATH
+		FROM ITEM A
+		INNER JOIN FILES B
+		ON B.REF_SEQ = A.ITEM_SEQ AND B.FILE_TYPE = 'ITEM_MST'		
+		<include refid="Item.selectItemForDispWhere" />
+		ORDER BY 
+			<choose>
+				<when test="@org.apache.commons.lang3.StringUtils@equals(order, 'regDtDesc')">A.REG_DT DESC</when>
+				<when test="@org.apache.commons.lang3.StringUtils@equals(order, 'saleCntDesc')">A.SALE_CNT_TOT DESC</when>
+				<otherwise>A.REG_DT DESC</otherwise>
+			</choose>
+		LIMIT #{limitStart}, #{limitEnd}
+	</select>
+
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 조회 카운트 처리
+	-->
+	<select id="selectItemForDispCount" parameterType="Item" resultType="int">
+		/* Item.selectItemForDispCount */
+		SELECT
+			COUNT(*) 
+		FROM ITEM A
+		<include refid="Item.selectItemForDispWhere" />
+	</select>	
+	
+	<!--
+		작성자 : 정슬기
+		작성일 : 2018.05.02
+		기능 : 상품 조회 공통 조건절
+	-->
+	<sql id="selectItemForDispWhere">
+		WHERE
+			A.ITEM_STAT IN ('NORMAL', 'SOLDOUT') AND
+			A.ITEM_DISP_STAT = 'DISP'
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(ctgPath)">
+				AND EXISTS (
+					SELECT 1 FROM CTG T1
+					INNER JOIN ITEM_CTG T2
+					ON T2.CTG_SEQ = T1.CTG_SEQ AND T2.ITEM_CTG_TYPE = 'DISP' 
+					WHERE
+						T1.CTG_PATH LIKE CONCAT(#{ctgPath},'%') AND T2.ITEM_SEQ = A.ITEM_SEQ
+				)
+			</if>
+	</sql>	
+
+</mapper>

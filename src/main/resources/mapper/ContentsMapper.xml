@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	작성자 : 정슬기 
+	작성일 : 2018.04.16
+	기능 : - 게시판 관련 매퍼 
+-->
+
+<mapper namespace="Contents">
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 컨텐츠 등록 처리
+	-->
+	<insert id="insertContents" parameterType="Contents">
+		/* Contents.insertContents */
+		INSERT INTO CONTENTS(CONTENTS_TYPE, CONTENTS_SEQ_PARENT, REPLY_STEP, DISP_NO, USE_YN, DISP_YN, TITLE, CONTENTS, VIEW_CNT, REG_SEQ, REG_DT, MOD_SEQ, MOD_DT)
+		VALUES(#{contentsType}, #{contentsSeqParent}, #{replyStep}, #{dispNo}, #{useYn}, #{dispYn}, #{title}, #{contents}, #{viewCnt}, #{regSeq}, #{sysdate}, #{modSeq}, #{sysdate})
+		
+		<selectKey keyProperty="contentsSeq" order="AFTER" resultType="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 컨텐츠 조회 처리
+	-->
+	<select id="selectContents" parameterType="Contents" resultType="Contents">
+		/* Contents.selectContents */
+		SELECT
+			A.CONTENTS_SEQ, 
+			A.CONTENTS_TYPE, 
+			A.CONTENTS_SEQ_PARENT, 
+			A.REPLY_STEP, 
+			A.DISP_NO, 
+			A.USE_YN, 
+			A.DISP_YN, 
+			A.TITLE, 
+			A.CONTENTS, 
+			A.VIEW_CNT, 
+			A.REG_SEQ, 
+			A.REG_DT, 
+			B.NAME AS REG_NAME
+		FROM CONTENTS A
+		INNER JOIN USER B
+		ON B.USER_SEQ = A.REG_SEQ
+		WHERE
+			<include refid="selectContentsWhere" />
+		ORDER BY A.DISP_NO DESC
+		LIMIT #{limitStart}, #{limitEnd}
+	</select>
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 컨텐츠 카운트 조회 처리
+	-->
+	<select id="selectContentsCount" parameterType="Contents" resultType="int">
+		/* Contents.selectContentsCount */
+		SELECT
+			COUNT(*)
+		FROM CONTENTS A
+		WHERE
+			<include refid="selectContentsWhere" />
+	</select>
+
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 컨텐츠 조회 공통 조건절
+	-->
+	<sql id="selectContentsWhere">
+		<trim prefixOverrides="AND|OR">
+			<if test="contentsSeq != 0">
+				AND A.CONTENTS_SEQ = #{contentsSeq}
+			</if>
+			<if test="contentsSeqParent != 0">
+				AND A.CONTENTS_SEQ_PARENT = #{contentsSeqParent}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(dispYn)">
+				AND A.DISP_YN = #{dispYn}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(useYn)">
+				AND A.USE_YN = #{useYn}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(contentsType)">
+				AND A.CONTENTS_TYPE = #{contentsType}
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(keyWord)">
+				<if test="@org.apache.commons.lang3.StringUtils@equals(keyField, 'title')">
+					AND A.TITLE LIKE CONCAT('%', #{keyWord},'%')
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@equals(keyField, 'contents')">
+					AND A.CONTENTS LIKE CONCAT('%', #{keyWord},'%')
+				</if>
+			</if>
+			
+			
+		</trim>
+	</sql>
+
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 컨텐츠 삭제 가능여부를 반환함.(하위 컨텐츠 유무 확인)
+	-->
+	<select id="selectContentsRemoveYn" parameterType="Contents" resultType="String">
+		SELECT
+			CASE 
+				WHEN
+					EXISTS (
+						SELECT 1 FROM CONTENTS T 
+		                WHERE 
+		                	T.CONTENTS_SEQ_PARENT = #{contentsSeq}
+							<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(dispYn)">
+								AND T.DISP_YN = #{dispYn}
+							</if>
+							<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(useYn)">
+								AND T.USE_YN = #{useYn}
+							</if>
+		            )
+				THEN 'N'
+		        ELSE 'Y'
+		    END AS YN	
+	</select>
+
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 다음 컨텐츠 전시순서 계산값 반환
+				- 상위게시글이 존재하는지 여부에 따라 쿼리가 다름.
+	-->
+	<select id="selectContentsNextDisp" parameterType="Contents" resultType="float">
+		SELECT
+			CASE 
+				/* 상위게시글이 없는 경우 */
+				WHEN #{contentsSeqParent} = 0 THEN
+					(
+						SELECT
+							CASE
+								WHEN MAX(A.DISP_NO) IS NULL THEN 1
+								ELSE CEIL(MAX(A.DISP_NO)) + 1
+							END AS DISP_NO
+						FROM CONTENTS A
+						WHERE
+							A.CONTENTS_TYPE = #{contentsType}
+					)
+				/* 상위게시글이 있는 경우 - 상위게시글과 이전게시글을 찾아서 전시순서를 계산함. */
+				ELSE 
+					(
+						SELECT
+							SUM(A.DISP_NO) / 2 AS DISP_NO
+						FROM (
+							SELECT
+								MAX(A.DISP_NO) AS DISP_NO
+							FROM CONTENTS A
+							WHERE 
+								A.CONTENTS_TYPE = #{contentsType} AND 
+								A.DISP_NO &lt; (SELECT T.DISP_NO FROM CONTENTS T WHERE T.CONTENTS_TYPE = #{contentsType} AND T.CONTENTS_SEQ = #{contentsSeqParent})
+							UNION ALL
+							SELECT 
+								A.DISP_NO
+							FROM CONTENTS A
+							WHERE
+								A.CONTENTS_TYPE = #{contentsType} AND A.CONTENTS_SEQ = #{contentsSeqParent}
+						) A
+		            )
+			END AS DISP_NO
+	</select>
+
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 컨텐츠 수정 업데이트 처리
+	-->
+	<update id="updateContents" parameterType="Contents">
+		UPDATE CONTENTS SET
+			TITLE		= #{title}, 
+			CONTENTS	= #{contents}, 
+			MOD_SEQ		= #{modSeq}, 
+			MOD_DT		= #{sysdate}
+		WHERE
+			CONTENTS_SEQ = #{contentsSeq}
+	</update>
+
+
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 컨텐츠 조회수 업데이트 처리
+	-->
+	<update id="updateContentsViewCnt" parameterType="int">
+		UPDATE CONTENTS SET
+			VIEW_CNT = VIEW_CNT + 1
+		WHERE
+			CONTENTS_SEQ = #{contentsSeq}
+	</update>
+
+
+	<!--
+		작성자 : enitsed
+		작성일 : 2018.04.16
+		기능 : 컨텐츠 사용여부 업데이트 처리
+	-->
+	<update id="updateContentsUseYn" parameterType="int">
+		UPDATE CONTENTS SET
+			USE_YN = 'N'
+		WHERE
+			CONTENTS_SEQ = #{contentsSeq}
+	</update>
+
+
+</mapper>

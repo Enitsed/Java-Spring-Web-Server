@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+
+	<!-- property 설정 : spring.profiles.active 환경변수의 값을 조정해서 구성할 수 있음. -->
+	<context:property-placeholder location="classpath:properties/controller.${spring.profiles.active:local}.properties" />
+
+	<context:component-scan base-package="kr.co.crewmate.web" />
+
+	<aop:aspectj-autoproxy />
+
+	<mvc:annotation-driven />
+
+	<mvc:default-servlet-handler default-servlet-name="${default.servlet.name}" />
+
+	<!-- content negotiation view resolver setting : json, jsonp, xml 요청 확장자에 맞는 뷰를 처리 -->
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="order" value="1" />
+		<property name="contentNegotiationManager">
+			<bean class="org.springframework.web.accept.ContentNegotiationManager">
+				<constructor-arg>
+					<bean class="org.springframework.web.accept.PathExtensionContentNegotiationStrategy">
+						<constructor-arg>
+							<map>
+								<entry key="json" value="application/json" />
+								<entry key="jsonp" value="javascript/jsonp" />
+								<entry key="xml" value="application/xml" />
+							</map>
+						</constructor-arg>
+					</bean>
+				</constructor-arg>
+			</bean>
+		</property>
+		<property name="defaultViews">
+			<list>
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="kr.co.crewmate.core.web.view.JSONPView">
+					<property name="contentType" value="javascript/jsonp" />
+				</bean>
+				<bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+					<property name="marshaller">
+						<bean class="org.springframework.oxm.castor.CastorMarshaller" />
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<!-- tiles view resolver setting : 컨트롤러에서 no-tiles: 를 접두어로 사용하면 다음 resolver로  처리함. -->
+	<bean id="tilesViewResolver" class="kr.co.crewmate.core.web.resolver.TilesViewResolver">
+		<property name="order" value="9" />
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView" />
+	</bean>
+	<bean class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+		<property name="definitions">
+			<value>/WEB-INF/tiles/tiles.xml</value>
+		</property>
+		<property name="preparerFactoryClass">
+			<value>org.springframework.web.servlet.view.tiles3.SimpleSpringPreparerFactory</value>
+		</property>
+	</bean>
+
+
+	<!-- common view resolver setting : tiles를 통하지 않는 경우 마지막으로 여기에서 처리됨. -->
+	<bean id="viewResolver" class="kr.co.crewmate.core.web.resolver.InternalResourceViewResolver">
+		<property name="order" value="10" />
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+
+	<!-- multipart resolver -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="52428800" />
+	</bean>
+
+	<!-- exception resolver -->
+	<bean id="exceptionResolver" class="kr.co.crewmate.web.resolver.WebExceptionResolver" p:defaultErrorView="exception/baseException">
+		<!--
+		<property name="exceptionMappings">
+			<props>
+				<prop key="kr.co.crewmate.core.exception.BadRequestException">exception/badRequestException</prop>
+				<prop key="org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException">exception/sizeLimitExceededException</prop>
+			</props>
+		</property>
+		-->
+	</bean>
+ 
+ 
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean class="kr.co.crewmate.core.web.interceptor.BaseInterceptor" />
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean class="kr.co.crewmate.web.interceptor.WebInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+</beans>

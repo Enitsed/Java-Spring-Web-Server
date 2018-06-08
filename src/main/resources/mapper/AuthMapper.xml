@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	작성자 : 정슬기 
+	작성일 : 2018.04.02
+	기능 : - 로그인 관련 매퍼 
+-->
+
+<mapper namespace="Auth">
+
+	<!-- 작성자 : 정슬기
+		  작성일 : 2018.04.02
+		  기능 : - 로그인 기록 정보 추가
+	-->
+	<insert id="insertAuthHist" parameterType="AuthHist">
+	/* Auth.insertAuthHist */
+		INSERT INTO AUTH_HIST(USER_SEQ, USER_ID, REG_DT, AUTH_TYPE, SUCCESS_YN, IP, USER_AGENT)
+		VALUES(#{userSeq}, #{userId}, #{sysdate}, #{authType}, #{successYn}, #{ip}, #{userAgent})
+	</insert>
+	
+</mapper>

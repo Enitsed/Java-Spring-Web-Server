@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="cacheEnabled" value="true" />
+		<setting name="lazyLoadingEnabled" value="false" />
+		<setting name="multipleResultSetsEnabled" value="true" />
+		<setting name="useColumnLabel" value="true" />
+		<setting name="useGeneratedKeys" value="false" />
+		<setting name="defaultExecutorType" value="REUSE" />
+		<setting name="defaultStatementTimeout" value="25000" />
+		<setting name="mapUnderscoreToCamelCase" value="true" /> 	<!-- db column 의 xx_yy 형식을 camelCase xxYY 형식으로 자동 매핑 -->
+		<setting name="jdbcTypeForNull" value="VARCHAR" />			<!-- #{id, jdbcType=VARCHAR}를 하지 않기 위해서 설정함. -->
+		<setting name="logPrefix" value="Query.log."/>
+	</settings>
+
+
+	<typeHandlers>
+		<!-- java.sql.Timestamp 를 java.util.Date 형으로 반환 -->
+		<typeHandler javaType="java.sql.Timestamp" handler="org.apache.ibatis.type.DateTypeHandler" />
+		<typeHandler javaType="java.sql.Time" handler="org.apache.ibatis.type.DateTypeHandler" />
+		<typeHandler javaType="java.sql.Date" handler="org.apache.ibatis.type.DateTypeHandler" />
+		<typeHandler javaType="java.lang.String" handler="org.apache.ibatis.type.StringTypeHandler" />
+	</typeHandlers>
+
+
+	<mappers>
+		<!-- mapper resource="ldg/mybatis/repository/mapper/CommentMapper.xml" /-->
+	</mappers>
+
+
+
+</configuration>
