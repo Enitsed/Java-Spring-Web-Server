@@ -1,6 +1,5 @@
 package kr.co.crewmate.web.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -119,7 +118,6 @@ public class ContentsController extends ApiBaseController{
 		
 		return new ModelAndView("contents/bbsForm");
 	}	
-	
 	
 	/**
 	 * 컨텐츠 등록 처리
