@@ -6,16 +6,14 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="/crewmate/core" prefix="core" %>
 
-<h3>카테고리 목록 </h3> <button class="btn btn-primary" onclick="location.href='/category/ctgForm.do'"> 카테고리 작성</button>
-
+<h3>카테고리 목록 </h3>
+<button class="btn btn-primary" onclick="location.href='/category/ctgForm.do'"> 카테고리 작성</button>
 <hr />
 
 <div id="tree">
 </div>
 
-
-
-<script>
+<script type="text/javascript">
 //카테고리를 트리형식으로 구성함.
 function createTree(){
 	$("#tree").jstree({
@@ -35,12 +33,12 @@ function createTree(){
 					// 정상 처리
 					var list = [];
 					
-					for(var i=0, d ; d = data.list[i] ; i++){
+					for(var i=0, d; d = data.list[i]; i++) {
 						list.push(
 							$.extend(true, d, {
-								text : d.ctgNm + " [" + d.dispYn + ", " + d.dispNo + "]", 
-								id : d.ctgSeq, 
-								children : d.subCtgYn == "Y" ? true : false 
+								text : d.ctgNm + " [" + d.dispYn + ", " + d.dispNo + "]",
+								id : d.ctgSeq,
+								children : d.subCtgYn == "Y" ? true : false
 							})
 						);
 					}
@@ -59,12 +57,8 @@ function createTree(){
 	});
 }
 
-
-
 $(document).ready(function(evt){
 	// 카테고리를 트리형식으로 구성함.
 	createTree();
 });
-
-
 </script>
