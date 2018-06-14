@@ -1,5 +1,6 @@
 package kr.co.crewmate.web.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -55,7 +56,6 @@ public class ContentsController extends ApiBaseController{
 	@RequestMapping("/contents/bbsList")
 	public ModelAndView bbsList(ModelMap model, Contents contents) {
 		model.addAttribute("result", this.contentsService.getContentsList(Constants.contentsType.BBS, contents.getKeyField(), contents.getKeyWord(), contents.getPage(), contents.getListSize(), contents.getPageSize()));
-		
 		return new ModelAndView("contents/bbsList");
 	}	
 
@@ -109,12 +109,10 @@ public class ContentsController extends ApiBaseController{
 			// 작성자 검증 - 수정모드인 경우에만 검증함.
 			if(StringUtils.equals("update", mode) && data.getRegSeq() != super.getFoUser().getUserSeq()) { throw new BadRequestException(); }
 		}
-		
 		model.addAttribute("data", data);
 		
 		// 수정모드인 경우에만 첨부파일 정보 구성
 		model.addAttribute("fileInfoListJsonStr", StringUtils.equals(mode, "update") ? FileService.getFileInfoListJsonStr(data.getFilesList()) : "[]");
-		
 		
 		// 이미지 출력을 위한 기본 경로 정보 구성
 		model.addAttribute("imgBase", "/images/" + Constants.filePrefix.CONTENTS);		
@@ -140,11 +138,9 @@ public class ContentsController extends ApiBaseController{
 		String mode = StringUtils.defaultIfEmpty(contents.getMode(), "create");
 		if(!ArrayUtils.contains(new String[] {"create", "update", "reply"}, mode)) { throw new BadRequestException(); }
 		
-		
 		// 사용자 정보 획득
 		User currUser = super.getFoUser();
 
-		
 		// 첨부파일 정보 획득
 		ObjectMapper om = new ObjectMapper();
 		List<FileInfo> fileInfoList = StringUtils.isNotBlank(fileInfoStr) ? om.readValue(om.readTree(fileInfoStr).traverse(), new TypeReference<List<FileInfo>>() {}) : null;
@@ -169,15 +165,11 @@ public class ContentsController extends ApiBaseController{
 
 			result = this.contentsService.updateContents(currUser.getUserSeq(), contents, fileInfoList, Constants.fileServiceType.IMAGE);
 		}
-		
-		
 		// 처리결과 등록
 		super.addResultToModel(model, result);
 		
-		
 		return new MappingJackson2JsonView();
 	}
-	
 	
 	/**
 	 * 컨텐츠 삭제 처리
@@ -196,7 +188,6 @@ public class ContentsController extends ApiBaseController{
 		Contents data = this.contentsService.getContents(contents.getContentsSeq(), Constants.contentsType.BBS, Constants.Y, Constants.Y);
 		if(data == null) { throw new BadRequestException(); }
 		if(data.getRegSeq() != super.getFoUser().getUserSeq()) { throw new BadRequestException(); }
- 
 		
 		// 삭제처리
 		Result result = this.contentsService.removeContents(contents.getContentsSeq());
@@ -206,8 +197,6 @@ public class ContentsController extends ApiBaseController{
 		
 		return new MappingJackson2JsonView();
 	}
-	
-	
 
 	/**
 	 * 첨부파일 다운로드 처리
