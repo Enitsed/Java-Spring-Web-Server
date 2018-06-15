@@ -3,6 +3,7 @@ package kr.co.crewmate.web.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -21,6 +22,7 @@ import kr.co.crewmate.core.util.StringUtil;
  * 회원가입을 위한 컨트롤러
  *
  */
+@CrossOrigin(origins="http://localhost:4200")
 @Controller
 public class JoinController extends ApiBaseController {
 	@Autowired

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -27,6 +28,7 @@ import kr.co.crewmate.core.util.StringUtil;
  * @author crewmate
  *
  */
+@CrossOrigin(origins="http://localhost:4200")
 @Controller
 public class AuthController extends ApiBaseController {
 	@Autowired
@@ -57,7 +59,7 @@ public class AuthController extends ApiBaseController {
 	public View login(
 		HttpServletResponse response, 
 		ModelMap model, 
-		User user, 
+		User user,
 		@RequestParam(name="saveIdYn", required=false, defaultValue="N") String saveIdYn, 
 		@RequestParam(name="redirectUrl", required=false, defaultValue="") String redirectUrl
 	) throws Exception {

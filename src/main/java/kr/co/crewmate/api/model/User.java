@@ -9,10 +9,10 @@ public class User extends BaseModel {
 	private int userSeq;
 	
 	/** 사용자 아이디 */
-	private String userId;
+	private String _userId;
 	
 	/** 사용자 비밀번호 */
-	private String userPw;
+	private String _userPw;
 	
 	/** 사용자 이름 */
 	private String name;
@@ -41,19 +41,19 @@ public class User extends BaseModel {
 	}
 
 	public String getUserId() {
-		return userId;
+		return _userId;
 	}
 
 	public void setUserId(String userId) {
-		this.userId = userId;
+		this._userId = userId;
 	}
 
 	public String getUserPw() {
-		return userPw;
+		return _userPw;
 	}
 
 	public void setUserPw(String userPw) {
-		this.userPw = userPw;
+		this._userPw = userPw;
 	}
 
 	public String getName() {
