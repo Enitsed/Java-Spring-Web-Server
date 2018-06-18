@@ -46,7 +46,7 @@ public class CategoryService extends BaseService {
 	/**
 	 * 전체 카테고리 정보를 static데이터에 로딩 시킨다.
 	 */
-	@Scheduled(fixedDelay = 1000 * 60 * 30)
+//	@Scheduled(fixedDelay = 1000 * 60 * 30)
 	public void loadCtgMapInfo() {
 		// 셋팅 데이터 초기화
 		Map<Integer, Category> map = new HashMap<Integer, Category>();

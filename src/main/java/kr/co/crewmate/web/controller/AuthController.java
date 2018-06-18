@@ -91,7 +91,7 @@ public class AuthController extends ApiBaseController {
 		// 아이디 저장 처리
 		if(StringUtils.equals(saveIdYn, Constants.Y)) {
 			super.saveCookie(response, Constants.USER_ID_COOKIE_KEY, user.getUserId(), 60 * 60 * 24 * 365);
-		}else {
+		} else {
 			super.removeCookie(response, Constants.USER_ID_COOKIE_KEY);
 		}
 		
