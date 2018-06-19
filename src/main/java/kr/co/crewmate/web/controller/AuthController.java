@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -101,9 +102,9 @@ public class AuthController extends ApiBaseController {
 		}
 		model.addAttribute("redirectUrl", redirectUrl);
 		
+		model.addAttribute(chkUser);
 		// 정상처리 표기
 		super.addResultToModel(model, new Result());
-		
 		return new MappingJackson2JsonView();
 	}
 	
