@@ -26,11 +26,19 @@
 		<param-name>spring.profiles.active</param-name>
 		<param-value>local</param-value>
 	</context-param>
+	
+	<!-- 
+		기본적으로 /WEB-INF 에 있는 applicationContext 파일을 찾지만 Context-param 설정으로 경로설정을 변경 할 수 있다.
+		또한 classpath: 설정과 ANT스타일 표현방법으로 여러개의 파일을 지정할 수 도 있다.
+	 -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:/config/applicationContext.xml</param-value>
 	</context-param>
 
+	<!-- 
+		리스너를 등록하면 디폴트값인 /WEB-INF/applicationContext.xml 을 사용하고 context-param으로 경로를 수정할 수 있다.
+	 -->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
