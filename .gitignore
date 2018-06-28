@@ -6,3 +6,5 @@
 .svn/
 .tern-project
 target/
+bin/
+
